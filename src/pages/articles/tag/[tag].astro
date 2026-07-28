@@ -1,0 +1,67 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { slugifyTag } from '../../../utils/slugify';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  const tags = new Set<string>();
+  articles.forEach((a) => a.data.tags.forEach((t) => tags.add(t)));
+  return Array.from(tags).map((tag) => ({
+    params: { tag: slugifyTag(tag) },
+    props: { tag, articles: articles.filter((a) => a.data.tags.includes(tag)) },
+  }));
+}
+
+const { tag, articles } = Astro.props;
+const sorted = articles.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Articles', url: '/articles/' },
+  { name: tag, url: `/articles/tag/${slugifyTag(tag)}/` },
+];
+---
+<Layout
+  title={tag}
+  description={`High Voltage Insights articles tagged ${tag}.`}
+  breadcrumbs={breadcrumbs}
+>
+  <h1>{tag}</h1>
+  <ul class="article-list">
+    {sorted.map((article) => (
+      <li>
+        <a class="row" href={`/articles/${article.slug}/`}>
+          <span class="text">
+            <span class="category">{article.data.category}</span>
+            <span class="title">{article.data.title}</span>
+            <p>{article.data.description}</p>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</Layout>
+
+<style>
+  .article-list { list-style: none; padding: 0; margin: 24px 0 0; }
+  .article-list li { padding: 18px 0; border-bottom: 1px solid #1C222E; }
+  .row { text-decoration: none; }
+  .category {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #38E8D4;
+    margin-bottom: 4px;
+  }
+  .title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #F2F5F8;
+    display: block;
+  }
+  .article-list p { margin: 6px 0 0; color: #A6AFBE; font-size: 0.95rem; }
+</style>
