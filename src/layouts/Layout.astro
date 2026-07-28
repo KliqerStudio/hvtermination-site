@@ -1,0 +1,323 @@
+---
+interface Breadcrumb {
+  name: string;
+  url: string;
+}
+
+interface Props {
+  title: string;
+  seoTitle?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  breadcrumbs?: Breadcrumb[];
+  schema?: Record<string, unknown>;
+}
+
+const {
+  title,
+  seoTitle,
+  description = "Independent-format technical coverage of high-voltage cable termination, published by Reynard.",
+  image = "/og-image.png",
+  type = "website",
+  publishedTime,
+  modifiedTime,
+  breadcrumbs,
+  schema,
+} = Astro.props;
+
+const siteName = "High Voltage Insights";
+const pageTitleTag = seoTitle ?? `${title} — ${siteName}`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": `${Astro.site}#organization`,
+  name: siteName,
+  url: Astro.site?.toString(),
+  logo: new URL("/favicon.svg", Astro.site).toString(),
+  parentOrganization: {
+    "@type": "Organization",
+    name: "Reynard High Voltage Solutions",
+    url: "https://reynard.nl",
+  },
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${Astro.site}#website`,
+  name: siteName,
+  url: Astro.site?.toString(),
+  publisher: { "@id": `${Astro.site}#organization` },
+};
+
+const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: breadcrumbs.map((crumb, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: crumb.name,
+    item: new URL(crumb.url, Astro.site).toString(),
+  })),
+} : null;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HVT2026TERM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-HVT2026TERM');
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <title>{pageTitleTag}</title>
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={siteName} href="/rss.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={imageURL} />
+    {type === "article" && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+    {type === "article" && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime} />
+    )}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageURL} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    {breadcrumbSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    )}
+    {schema && (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    )}
+  </head>
+  <body>
+    <div class="disclosure-bar">
+      Published by <a href="/about/">Reynard High Voltage Solutions</a> — independent-format technical coverage, openly affiliated.
+    </div>
+    <header class="site-header">
+      <div class="wrap masthead">
+        <a class="brand" href="/">
+          <svg class="brand-mark" width="30" height="30" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#38E8D4" stroke-width="1.5" opacity="0.6"></circle>
+            <circle cx="28" cy="28" r="17" fill="none" stroke="#38E8D4" stroke-width="1.5" opacity="0.75"></circle>
+            <circle cx="28" cy="28" r="10" fill="none" stroke="#38E8D4" stroke-width="1.5"></circle>
+            <circle cx="28" cy="28" r="4" fill="#38E8D4"></circle>
+          </svg>
+          <span>HIGH VOLTAGE<br/>INSIGHTS</span>
+        </a>
+        <nav>
+          <a href="/articles/">Trends</a>
+          <a href="/articles/tag/standards/">Standards</a>
+          <a href="/about/">About</a>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          {breadcrumbs.map((crumb, i) => (
+            <>
+              {i > 0 && <span class="crumb-sep">/</span>}
+              {i === breadcrumbs.length - 1
+                ? <span aria-current="page">{crumb.name}</span>
+                : <a href={crumb.url}>{crumb.name}</a>}
+            </>
+          ))}
+        </nav>
+      )}
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div>
+          <p class="footer-brand">HIGH VOLTAGE INSIGHTS</p>
+          <p>Independent-format technical coverage of high-voltage termination technology.</p>
+          <p class="disclosure-footnote">Published by <a href="https://reynard.nl">Reynard High Voltage Solutions</a>. See our <a href="/about/">About page</a> for the full relationship.</p>
+        </div>
+        <div>
+          <p class="footer-heading">Content</p>
+          <a href="/articles/">All articles</a>
+        </div>
+        <div>
+          <p class="footer-heading">More</p>
+          <a href="/about/">About</a>
+          <a href="https://reynard.nl">Reynard</a>
+        </div>
+      </div>
+      <div class="wrap">
+        <p class="fine-print">© {new Date().getFullYear()} High Voltage Insights, a Reynard publication.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --void: #06080D;
+    --panel: #0B0F17;
+    --line: #1C222E;
+    --signal: #F2F5F8;
+    --muted: #A6AFBE;
+    --accent: #38E8D4;
+    --accent2: #7C6BFF;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  ::selection { background: var(--accent); color: var(--void); }
+  body {
+    margin: 0;
+    font-family: var(--font-display);
+    background: var(--void);
+    color: var(--signal);
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .disclosure-bar {
+    background: var(--accent2);
+    color: var(--void);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 8px 16px;
+    letter-spacing: 0.01em;
+  }
+  .disclosure-bar a { color: var(--void); font-weight: 600; }
+  .site-header {
+    border-bottom: 1px solid var(--line);
+    background: var(--void);
+  }
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 22px 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--signal);
+    text-decoration: none;
+    line-height: 1.3;
+  }
+  nav a {
+    margin-left: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  nav a:hover { color: var(--accent); }
+  main { padding: 44px 24px 64px; }
+  .breadcrumbs {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .breadcrumbs a { color: var(--muted); text-decoration: none; }
+  .breadcrumbs a:hover { color: var(--accent); }
+  .breadcrumbs .crumb-sep { margin: 0 8px; color: var(--line); }
+  .breadcrumbs [aria-current="page"] { color: var(--signal); }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    color: var(--signal);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  a { color: var(--accent); }
+  p { color: var(--signal); }
+  .site-footer {
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+    padding: 40px 0 30px;
+    margin-top: 40px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 24px;
+    padding-bottom: 24px;
+  }
+  .footer-grid a {
+    display: block;
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    margin: 6px 0;
+  }
+  .footer-grid a:hover { color: var(--accent); }
+  .footer-brand {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--signal);
+    margin: 0 0 8px;
+  }
+  .footer-grid > div > p:not(.footer-brand):not(.footer-heading) {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0 0 8px;
+  }
+  .disclosure-footnote { font-size: 0.82rem !important; }
+  .disclosure-footnote a { color: var(--accent); }
+  .footer-heading {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .site-footer .wrap:last-child { border-top: 1px solid var(--line); padding-top: 16px; }
+  .fine-print {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
