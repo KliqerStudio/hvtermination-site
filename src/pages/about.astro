@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'About', url: '/about/' },
+];
+---
+<Layout
+  title="About"
+  description="High Voltage Insights is published by Reynard High Voltage Solutions — what that means for our coverage."
+  breadcrumbs={breadcrumbs}
+>
+  <h1>About High Voltage Insights</h1>
+
+  <h2>Who publishes this</h2>
+  <p>
+    High Voltage Insights is published by <a href="https://reynard.nl">Reynard High Voltage Solutions</a>,
+    a Netherlands-based provider of high-voltage jointing, testing, and preassembled cable
+    systems for onshore and offshore projects. We built this site to cover HV termination
+    technology — materials, methods, and standards — in more depth than fits naturally on
+    Reynard's own service pages.
+  </p>
+
+  <h2>What "independent-format" means</h2>
+  <p>
+    We write in an editorial, trade-press format rather than a sales format: no pricing,
+    no calls to request a quote, no product pages. The content is reported and written to
+    the same standard we'd hold an outside technical publication to. Where we reference
+    Reynard's own work — a project, a testing method, a termination system — it's because
+    it's directly relevant to the technical point being made, not placed for promotional
+    reasons.
+  </p>
+
+  <h2>Relationship to droppercable.com</h2>
+  <p>
+    <a href="https://droppercable.com">Plug &amp; Go High Voltage</a> is a sister publication
+    also produced by Reynard, focused specifically on offshore wind dropper cables and
+    connection systems. The two sites cover adjacent but distinct topics — dropper cables
+    and array-side connections there, termination technology and field grading here — and
+    link to each other where a topic genuinely overlaps.
+  </p>
+
+  <h2>Editorial standards</h2>
+  <p>
+    We write for engineers, asset managers, and procurement teams who want specifics —
+    material chemistry, test standards, failure modes, named projects — cited from public
+    reporting and standards documentation where we reference them, not marketing copy.
+  </p>
+</Layout>
