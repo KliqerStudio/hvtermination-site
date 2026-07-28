@@ -1,0 +1,170 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { slugifyTag } from '../../utils/slugify';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await article.render();
+
+const allArticles = await getCollection('articles', ({ data }) => !data.draft);
+const related = allArticles
+  .filter((a) => a.slug !== article.slug)
+  .filter((a) => a.data.category === article.data.category || a.data.tags.some((t) => article.data.tags.includes(t)))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Articles', url: '/articles/' },
+  { name: article.data.title, url: `/articles/${article.slug}/` },
+];
+
+const publishedISO = article.data.pubDate.toISOString();
+const modifiedISO = (article.data.updatedDate ?? article.data.pubDate).toISOString();
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: article.data.title,
+  description: article.data.description,
+  datePublished: publishedISO,
+  dateModified: modifiedISO,
+  author: { "@type": "Organization", name: "High Voltage Insights", url: "https://hvtermination.com" },
+  publisher: { "@id": "https://hvtermination.com/#organization" },
+  mainEntityOfPage: `https://hvtermination.com/articles/${article.slug}/`,
+  articleSection: article.data.category,
+  keywords: article.data.tags.join(', '),
+  ...(article.data.image ? { image: new URL(article.data.image, Astro.site).toString() } : {}),
+};
+---
+<Layout
+  title={article.data.title}
+  seoTitle={article.data.seoTitle}
+  description={article.data.description}
+  type="article"
+  image={article.data.image}
+  publishedTime={publishedISO}
+  modifiedTime={modifiedISO}
+  breadcrumbs={breadcrumbs}
+  schema={articleSchema}
+>
+  <article>
+    <p class="category">{article.data.category}</p>
+    <h1>{article.data.title}</h1>
+    <p class="meta">
+      {article.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      {article.data.updatedDate && (
+        <> · Updated {article.data.updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</>
+      )}
+    </p>
+    {article.data.image && (
+      <figure class="hero">
+        <img src={article.data.image} alt={article.data.imageAlt ?? ''} width="1200" height="630" loading="eager" />
+        {article.data.imageAlt && <figcaption>{article.data.imageAlt}</figcaption>}
+      </figure>
+    )}
+    <div class="prose">
+      <Content />
+    </div>
+    {article.data.tags.length > 0 && (
+      <p class="tags">
+        {article.data.tags.map((tag) => (
+          <a href={`/articles/tag/${slugifyTag(tag)}/`}>{tag}</a>
+        ))}
+      </p>
+    )}
+    {related.length > 0 && (
+      <aside class="related">
+        <p class="eyebrow">Related reading</p>
+        <ul>
+          {related.map((r) => (
+            <li><a href={`/articles/${r.slug}/`}>{r.data.title}</a></li>
+          ))}
+        </ul>
+      </aside>
+    )}
+  </article>
+</Layout>
+
+<style>
+  .category {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #38E8D4;
+    margin: 0 0 8px;
+  }
+  .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #A6AFBE;
+    margin-top: -4px;
+  }
+  .hero { margin: 20px 0 32px; }
+  .hero img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid #1C222E;
+    border-radius: 4px;
+  }
+  .hero figcaption {
+    margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: #A6AFBE;
+  }
+  .prose :global(p) { margin: 0 0 1.2em; color: #F2F5F8; }
+  .prose :global(a) { text-decoration: underline; color: #38E8D4; }
+  .prose :global(h2) { margin: 1.6em 0 0.6em; }
+  .tags { margin-top: 28px; }
+  .tags a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #38E8D4;
+    background: #0B0F17;
+    border: 1px solid #1C222E;
+    border-radius: 3px;
+    padding: 3px 8px;
+    margin-right: 6px;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .related {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid #1C222E;
+  }
+  .related .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #A6AFBE;
+    margin: 0 0 10px;
+  }
+  .related ul { list-style: none; padding: 0; margin: 0; }
+  .related li { padding: 8px 0; }
+  .related a {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: #F2F5F8;
+    text-decoration: none;
+  }
+  .related a:hover { color: #38E8D4; }
+</style>

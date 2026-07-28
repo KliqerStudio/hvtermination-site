@@ -1,0 +1,71 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allArticles = await getCollection('articles', ({ data }) => !data.draft);
+const articles = allArticles.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Articles', url: '/articles/' },
+];
+---
+<Layout
+  title="Articles"
+  description="All High Voltage Insights coverage of HV termination materials, standards, and field practice."
+  breadcrumbs={breadcrumbs}
+>
+  <h1>Articles</h1>
+  <p>
+    Reporting on HV termination technology — materials, methods, and standards — for
+    engineers and asset managers, not search engines.
+  </p>
+  <ul class="article-list">
+    {articles.map((article) => (
+      <li>
+        <a class="row" href={`/articles/${article.slug}/`}>
+          {article.data.image && (
+            <img class="thumb" src={article.data.image} alt="" width="120" height="63" loading="lazy" />
+          )}
+          <span class="text">
+            <span class="category">{article.data.category}</span>
+            <span class="title">{article.data.title}</span>
+            <p>{article.data.description}</p>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</Layout>
+
+<style>
+  .article-list { list-style: none; padding: 0; margin: 24px 0 0; }
+  .article-list li { padding: 18px 0; border-bottom: 1px solid #1C222E; }
+  .row { display: flex; align-items: flex-start; gap: 16px; text-decoration: none; }
+  .thumb {
+    flex-shrink: 0;
+    width: 120px;
+    height: 63px;
+    object-fit: cover;
+    border: 1px solid #1C222E;
+    border-radius: 3px;
+  }
+  .text { flex: 1; }
+  .category {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #38E8D4;
+    margin-bottom: 4px;
+  }
+  .title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #F2F5F8;
+    display: block;
+  }
+  .article-list p { margin: 6px 0 0; color: #A6AFBE; font-size: 0.95rem; }
+</style>
