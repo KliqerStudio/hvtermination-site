@@ -7,7 +7,7 @@ export async function GET(context) {
 
   return rss({
     title: 'High Voltage Insights',
-    description: 'Independent-format technical coverage of high-voltage cable termination — materials, methods, and standards. Published by Reynard.',
+    description: 'Independent technical coverage of high-voltage cable termination — materials, methods, and standards.',
     site: context.site,
     items: sorted.map((article) => ({
       title: article.data.title,
