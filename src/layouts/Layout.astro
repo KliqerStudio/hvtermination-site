@@ -19,7 +19,7 @@ interface Props {
 const {
   title,
   seoTitle,
-  description = "Independent-format technical coverage of high-voltage cable termination, published by Reynard.",
+  description = "Independent technical coverage of high-voltage cable termination — materials, methods, and standards.",
   image = "/og-image.png",
   type = "website",
   publishedTime,
@@ -40,11 +40,6 @@ const organizationSchema = {
   name: siteName,
   url: Astro.site?.toString(),
   logo: new URL("/favicon.svg", Astro.site).toString(),
-  parentOrganization: {
-    "@type": "Organization",
-    name: "Reynard High Voltage Solutions",
-    url: "https://reynard.nl",
-  },
 };
 
 const websiteSchema = {
@@ -117,9 +112,6 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
     )}
   </head>
   <body>
-    <div class="disclosure-bar">
-      Published by <a href="/about/">Reynard High Voltage Solutions</a> — independent-format technical coverage, openly affiliated.
-    </div>
     <header class="site-header">
       <div class="wrap masthead">
         <a class="brand" href="/">
@@ -157,8 +149,7 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
       <div class="wrap footer-grid">
         <div>
           <p class="footer-brand">HIGH VOLTAGE INSIGHTS</p>
-          <p>Independent-format technical coverage of high-voltage termination technology.</p>
-          <p class="disclosure-footnote">Published by <a href="https://reynard.nl">Reynard High Voltage Solutions</a>. See our <a href="/about/">About page</a> for the full relationship.</p>
+          <p>Independent technical coverage of high-voltage termination technology.</p>
         </div>
         <div>
           <p class="footer-heading">Content</p>
@@ -167,11 +158,10 @@ const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0 ? {
         <div>
           <p class="footer-heading">More</p>
           <a href="/about/">About</a>
-          <a href="https://reynard.nl">Reynard</a>
         </div>
       </div>
       <div class="wrap">
-        <p class="fine-print">© {new Date().getFullYear()} High Voltage Insights, a Reynard publication.</p>
+        <p class="fine-print">© {new Date().getFullYear()} High Voltage Insights.</p>
       </div>
     </footer>
   </body>
