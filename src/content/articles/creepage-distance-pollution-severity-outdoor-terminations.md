@@ -6,6 +6,8 @@ pubDate: 2026-10-20
 draft: false
 category: "Standards"
 tags: ["Standards", "Field & Install", "Materials"]
+image: "/articles/creepage-distance-pollution-levels.png"
+imageAlt: "Bar chart of minimum specific creepage distance for outdoor HV terminations: 16 mm/kV for light, 20 for medium, 25 for heavy and 31 for very heavy pollution."
 ---
 
 A high-voltage termination has two jobs that are easy to blur together. Inside, it controls the electric field where the cable's shield ends. Outside, it has to keep the surface of the insulator from becoming a path for current. The second job is the one a clean lab never tests the way a coastal substation or a dusty industrial site does, and it's what creepage distance exists to solve.
